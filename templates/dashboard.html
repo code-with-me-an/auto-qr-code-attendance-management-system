@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="container m-3">
+    <h2 class="fw-bold">Dashboard</h2>
+</div>
+<div class="dashboard-contents container">
+    <div class="row">
+        <div class="col">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title">Total Students</h3>
+                    <h4 class="fs-2"> {{ total_students }} </h4>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title">Total Events</h3>
+                    <h4 class="fs-2"> {{ total_events }} </h4>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title">Total Attendance</h3>
+                    <h4 class="fs-2"> {{ total_attendance }} </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-3">
+        <h4 class="text-decoration-underline">Today Attendance</h4>
+        <div class="container overflow-y-scroll " id="attendance-today">
+            <div class="d-flex flex-column gap-2">
+                {% for attendance in today_attendance %}
+                <div class="row border rounded p-3">
+                    <div class="col">{{ attendance.student.name }}</div>
+                    <div class="col">{{ attendance.event.event_name }}</div>
+                    <div class="col">{{ attendance.marked_at }}</div>
+                </div>
+                {% else %}
+                    <p class="text-center text-secondary">No attendance record today</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h4 class="text-decoration-underline">Event Attendance Details</h4>
+        <div class="card my-3">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">
+                                Event
+                            </th>
+                            <th scope="col">
+                                Date
+                            </th>
+                            <th scope="col">
+                                Present
+                            </th>
+                            <th scope="col">
+                                percentage
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in event_statistics %}
+                            <tr>
+                                <td scop="row">{{ item.event.event_name }}</td>
+                                <td>{{ item.event.event_date }}</td>
+                                <td>{{ item.count }}</td>
+                                <td>{{ item.percentage }}</td>
+                            </tr>
+
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-secondary">
+                                    No event created
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
+
+</div>
+
+    
+{% endblock %}
+    
