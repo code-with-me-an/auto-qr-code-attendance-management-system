@@ -1,1 +1,196 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
+<div class="container m-3">
+  <h2 class="fw-bold">Attendance Registration</h2>
+</div>
+<div id="attendanceMessage"></div>
+<div class="container-fluid d-flex justify-content-center">
+  <div class="card m-3 w-50 d-flex flex-column justify-content-center">
+    <div class="card-body">
+      <form
+        action="{{ url_for('attendance') }}"
+        method="post"
+        id="attendanceForm"
+      >
+        <div class="mb-3">
+          <label for="events" class="form-label">Select Event</label>
+          <select
+            class="form-select"
+            aria-label="Default select example"
+            id="events"
+            name="event"
+            required
+          >
+            <option selected>Open this select menu</option>
+            {% for event in events %}
+            <option value="{{ event.event_id }}">{{event.event_name}}</option>
+            {% else %}
+            <option value="">No events created</option>
+            {%endfor%}
+          </select>
+        </div>
+        <div class="col-auto text-center">
+          <button type="button" class="btn btn-dark" id="QrButton">
+            <i class="fa-solid fa-camera"></i> &nbsp; QR SCANNER
+          </button>
+        </div>
+        <div
+          class="card m-3 p-3"
+          id="qrScannnerContainer"
+          style="display: none"
+        >
+          <div id="qr_reader" class="m-3"></div>
+          <div class="col-auto text-center">
+            <button type="button" class="btn btn-warning m-2" id="stopButton">
+              Stop Scanner
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="student_id" class="form-label">Enter Student ID</label>
+          <input
+            type="text"
+            class="form-control"
+            name="student_id"
+            id="student_id"
+            placeholder="AAK031"
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <div class="col-auto text-center">
+          <button type="submit" class="btn btn-primary mb-3">
+            Mark Attendance
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let qrScanner = null;
+  let currentText = null;
+  const scanButton = document.getElementById("QrButton");
+  const stopScanButton = document.getElementById("stopButton");
+  const scannerContainer = document.getElementById("qrScannnerContainer");
+  const inputStudentId = document.getElementById("student_id");
+  const attendanceForm = document.getElementById("attendanceForm");
+
+  scanButton.addEventListener("click", function () {
+    scannerContainer.style.display = "block";
+    scanButton.disabled = true;
+
+    qrScanner = new Html5Qrcode("qr_reader");
+    qrScanner
+      .start(
+        {
+          facingMode: "environment",
+        },
+        {
+          fps: 10,
+          qrbox: {
+            width: 350,
+            height: 350,
+          },
+        },
+        async function (decodedText) {
+          if (currentText == decodedText) {
+            return;
+          }
+
+          console.log("qr scanned:", decodedText);
+
+          const studentId = decodedText.trim().toUpperCase();
+
+          inputStudentId.value = studentId;
+          await markAttendance(studentId);
+
+          currentText = decodedText;
+        },
+        function (errorMessage) {},
+      )
+      .catch(function (error) {
+        console.error("camera Error:", error);
+        alert("Unable to access the camera");
+        scannerContainer.style.display = "none";
+        scanButton.disabled = false;
+      });
+  });
+
+  stopScanButton.addEventListener("click", function () {
+    if (qrScanner) {
+      qrScanner
+        .stop()
+        .then(function () {
+          console.log("QR scanner stopped");
+          qrScanner.clear();
+          qrScanner = null;
+          scannerContainer.style.display = "none";
+          scanButton.disabled = false;
+        })
+        .catch(function (error) {
+          console.error("Error in stopping scanner", error);
+        });
+    }
+    scannerContainer.style.display = "none";
+    scanButton.disabled = false;
+  });
+
+  async function markAttendance(studentId) {
+    const eventId = document.getElementById("events").value;
+    if (!eventId) {
+      showMessage("please select an event first", "danger");
+      return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("student_id", studentId);
+    formData.append("event_id", eventId);
+    try {
+      const response = await fetch("{{ url_for('attendance') }}", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showMessage(
+          `${data.student_name} (${data.student_id}) marked successfully`,
+          "success",
+        );
+      } else if (data.type === "duplicate") {
+        showMessage(
+          `Already marked — ${data.student_name} (${data.student_id})`,
+          "warning",
+        );
+      } else if (data.type === "not_found") {
+        showMessage(`Student ${data.student_id} is not registered`, "danger");
+      } else {
+        showMessage(data.message, "danger");
+      }
+    } catch (error) {
+      console.error(error);
+      showMessage("Server connection error", "danger");
+    }
+  }
+
+  function showMessage(message, type) {
+    const messageBox = document.getElementById("attendanceMessage");
+
+    messageBox.innerHTML = `
+        <div class="alert alert-${type}">
+            ${message}
+        </div>
+    `;
+
+    setTimeout(() => {
+      messageBox.innerHTML = "";
+    }, 3000);
+  }
+</script>
+
+{% endblock %}
