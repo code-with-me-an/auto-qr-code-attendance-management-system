@@ -75,77 +75,55 @@
       <div class="card m-2">
         <div class="card-header text-center">Add Student</div>
         <div class="card-body">
-            <form action="{{ url_for('add_student') }}" method="post">
-              <div class="mb-3">
-                <label for="name" class="form-label"
-                  >Student Name</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  name="student_name"
-                  id="name"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="roll_number" class="form-label"
-                  >Roll Number</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  name="roll_number"
-                  id="roll_number"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="department" class="form-label"
-                  >Department</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  name="department"
-                  id="department"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="year" class="form-label"
-                  >Year</label
-                >
-                <input
-                  type="number"
-                  class="form-control"
-                  name="year"
-                  min="1"
-                  max="5"
-                  id="year"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="email" class="form-label"
-                  >Email</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  name="email"
-                  id="email"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="phone" class="form-label"
-                  >Phone</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  name="phone"
-                  id="phone"
-                />
-              </div>
-              <button type="submit" class="btn btn-primary">Add Student</button>
-            </form>
+          <form action="{{ url_for('add_student') }}" method="post">
+            <div class="mb-3">
+              <label for="name" class="form-label">Student Name</label>
+              <input
+                type="text"
+                class="form-control"
+                name="student_name"
+                id="name"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="roll_number" class="form-label">Roll Number</label>
+              <input
+                type="text"
+                class="form-control"
+                name="roll_number"
+                id="roll_number"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="department" class="form-label">Department</label>
+              <input
+                type="text"
+                class="form-control"
+                name="department"
+                id="department"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="year" class="form-label">Year</label>
+              <input
+                type="number"
+                class="form-control"
+                name="year"
+                min="1"
+                max="5"
+                id="year"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="text" class="form-control" name="email" id="email" />
+            </div>
+            <div class="mb-3">
+              <label for="phone" class="form-label">Phone</label>
+              <input type="text" class="form-control" name="phone" id="phone" />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Student</button>
+          </form>
         </div>
       </div>
     </div>
@@ -153,57 +131,73 @@
       <div class="card m-2">
         <div class="card-header text-center">Add Event</div>
         <div class="card-body">
-            <form action="{{ url_for('add_event') }}" method="post">
-              <div class="mb-3">
-                <label for="name" class="form-label"
-                  >Event Name</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  name="event_name"
-                  id="name"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="event_date" class="form-label"
-                  >Event Date</label
-                >
-                <input
-                  type="date"
-                  class="form-control"
-                  name="event_date"
-                  id="event_date"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="start_time" class="form-label"
-                  >Start Time</label
-                >
-                <input
-                  type="time"
-                  class="form-control"
-                  name="start_time"
-                  id="start_time"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="end_time" class="form-label"
-                  >End Time</label
-                >
-                <input
-                  type="time"
-                  class="form-control"
-                  name="end_time"
-                  id="end_time"
-                />
-              </div>
-              <button type="submit" class="btn btn-primary">Add Event</button>
-            </form>
+          <form action="{{ url_for('add_event') }}" method="post">
+            <div class="mb-3">
+              <label for="name" class="form-label">Event Name</label>
+              <input
+                type="text"
+                class="form-control"
+                name="event_name"
+                id="name"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="event_date" class="form-label">Event Date</label>
+              <input
+                type="date"
+                class="form-control"
+                name="event_date"
+                id="event_date"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="start_time" class="form-label">Start Time</label>
+              <input
+                type="time"
+                class="form-control"
+                name="start_time"
+                id="start_time"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="end_time" class="form-label">End Time</label>
+              <input
+                type="time"
+                class="form-control"
+                name="end_time"
+                id="end_time"
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Event</button>
+          </form>
         </div>
       </div>
     </div>
   </div>
+</div>
+
+<div class="container-fluid">
+  <form action="{{ url_for('mass_registration') }}" method="post" enctype="multipart/form-data">
+    <div
+      class="mb-3 d-flex flex-column align-items-center justify-content-center"
+    >
+      <label for="formFile" class="form-label m-3"
+        >Upload the excel file for mass student registration</label
+      >
+      <div class="d-flex flex-row align-items-center justify-content-center mb-3">
+        <input
+          class="form-control me-3"
+          name="student_file"
+          type="file"
+          id="formFile"
+          accept=".xlsx,.xls"
+        />
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </div>
+  </form>
 </div>
 
 {% endblock %}

@@ -60,7 +60,7 @@
         </div>
 
         <div class="col-auto text-center">
-          <button type="submit" class="btn btn-primary mb-3">
+          <button type="button" class="btn btn-primary mb-3" id="submitButton">
             Mark Attendance
           </button>
         </div>
@@ -77,6 +77,7 @@
   const scannerContainer = document.getElementById("qrScannnerContainer");
   const inputStudentId = document.getElementById("student_id");
   const attendanceForm = document.getElementById("attendanceForm");
+  const submitButton = document.getElementById("submitButton");
 
   scanButton.addEventListener("click", function () {
     scannerContainer.style.display = "block";
@@ -117,6 +118,11 @@
         scannerContainer.style.display = "none";
         scanButton.disabled = false;
       });
+  });
+
+  submitButton.addEventListener("click", async function () {
+    student_id = inputStudentId.value;
+    await markAttendance(student_id);
   });
 
   stopScanButton.addEventListener("click", function () {

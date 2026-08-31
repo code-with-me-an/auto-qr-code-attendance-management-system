@@ -130,9 +130,13 @@ def add_student():
 
     # add another python script call
     last_student = Student.query.order_by(Student.student_id.desc()).first()
-    last_id_num = int(last_student.student_id[3:]) + 1
+    if last_student:
+        last_id_num = int(last_student.student_id[3:]) + 1
+        student_id = student_id_generation("AAK", last_id_num)
+    else :
+        last_id_num = 30
+        student_id = student_id_generation("AAK", last_id_num)
 
-    student_id = student_id_generation("AAK", last_id_num)
     student_name = request.form.get("student_name", "").strip()
     roll_number = request.form.get("roll_number", "").strip()
     department = request.form.get("department", "").strip()
@@ -155,6 +159,23 @@ def add_student():
 
     return redirect(url_for("system_data"))
 
+
+@app.route("/students/mass-registration",methods=["POST"])
+def mass_registration():
+
+    file = request.files.get("student_file","")
+
+    if not file:
+        print("file is not selected")
+        return redirect(url_for("system_data"))
+
+    print("file shared")
+
+    
+
+
+
+    return redirect(url_for("system_data"))
 
 @app.route("/event/add", methods=["POST"])
 def add_event():
@@ -226,7 +247,8 @@ def attendance():
 
         attendance_record = Attendance(
             student_id = student_id,
-            event_id = event_id
+            event_id = event_id,
+            marked_at = datetime.now()
         )
 
         try:
