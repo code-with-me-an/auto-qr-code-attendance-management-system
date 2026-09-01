@@ -41,4 +41,5 @@ def student_id_generation(prefix,start_num):
         create_qr(unique_code)
     except Exception as e:
         print(f"error is occured {e}")
+        return None
     return unique_code

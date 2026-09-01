@@ -27,8 +27,8 @@ nav .navbar-nav li a:hover{
     max-width: 300px;
     position: fixed;
     z-index: 200;
-    bottom: 100px;
-    left: 50px;
+    top: 150px;
+    left: 50vw;
 }
 
 #attendanceMessage .alert {

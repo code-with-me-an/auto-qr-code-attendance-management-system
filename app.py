@@ -4,6 +4,7 @@ from datetime import datetime, date, time
 from sqlalchemy.engine import URL
 from dotenv import load_dotenv
 import os
+import pandas as pd
 
 from qr_or_id_generation import student_id_generation
 
@@ -125,18 +126,21 @@ def system_data():
     return render_template("system_data.html", students=students, events=events)
 
 
-@app.route("/students/add", methods=["POST"])
-def add_student():
-
-    # add another python script call
+def gen_next_student_num():
     last_student = Student.query.order_by(Student.student_id.desc()).first()
     if last_student:
         last_id_num = int(last_student.student_id[3:]) + 1
-        student_id = student_id_generation("AAK", last_id_num)
-    else :
+    else:
         last_id_num = 30
-        student_id = student_id_generation("AAK", last_id_num)
 
+    return last_id_num
+
+
+@app.route("/students/add", methods=["POST"])
+def add_student():
+
+    last_id_num = gen_next_student_num()
+    student_id = student_id_generation("AAK", last_id_num)
     student_name = request.form.get("student_name", "").strip()
     roll_number = request.form.get("roll_number", "").strip()
     department = request.form.get("department", "").strip()
@@ -160,22 +164,90 @@ def add_student():
     return redirect(url_for("system_data"))
 
 
-@app.route("/students/mass-registration",methods=["POST"])
+@app.route("/students/mass-registration", methods=["POST"])
 def mass_registration():
 
-    file = request.files.get("student_file","")
+    file = request.files.get("student_file", "")
 
     if not file:
         print("file is not selected")
         return redirect(url_for("system_data"))
 
-    print("file shared")
+    if file.filename == "":
+        print("file is not selected")
+        return redirect(url_for("system_data"))
 
-    
+    if not file.filename.lower().endswith((".xlsx", ".xls")):
+        print("please provide .xlsx or .xls file")
+        return redirect(url_for("system_data"))
+
+    try:
+        df = pd.read_excel(file)
+
+        required_columns = [
+            "name",
+            "roll_number",
+            "department",
+            "year",
+            "email",
+            "phone",
+        ]
+        missing_column = []
+        for column in required_columns:
+            if column not in df.columns:
+                missing_column.append(column)
+
+        if missing_column:
+            print(f"missing columns {missing_column}")
+            return redirect(url_for("system_data"))
+
+        last_id_num = gen_next_student_num()
+
+        for index, row in df.iterrows():
+            try:
+                name = str(row["name"]).strip()
+                roll_number = str(row["roll_number"]).strip()
+                department = str(row["department"]).strip()
+                try:
+                    year_value = int(row["year"])
+                except (ValueError, TypeError) as e:
+                    print(f"invalid year type {e}")
+                    continue                    
+                email = str(row["email"]).strip()
+                phone = str(row["phone"]).strip()
+
+                student_id = student_id_generation("AAK", last_id_num)
+
+                if not student_id:
+                    print(f"failed to generate qr code for {index}")
+                    return redirect(url_for("system_data"))
+                last_id_num += 1
+
+                new_student = Student(
+                    student_id=student_id,
+                    name=name,
+                    roll_number=roll_number,
+                    department=department,
+                    year=year_value,
+                    email=email if email else None,
+                    phone=phone,
+                )
+
+                db.session.add(new_student)
+                db.session.commit()
+
+            except Exception as e:
+                print(e)
+                return redirect(url_for("system_data"))
 
 
+    except Exception as e:
+        print(e)
+        return redirect(url_for("system_data"))
 
+    print("all student are registered successfully")
     return redirect(url_for("system_data"))
+
 
 @app.route("/event/add", methods=["POST"])
 def add_event():
@@ -185,70 +257,60 @@ def add_event():
     end_time = request.form.get("end_time", "").strip()
 
     new_event = Event(
-        event_name = event_name,
-        event_date = event_date,
-        start_time = start_time,
-        end_time = end_time
+        event_name=event_name,
+        event_date=event_date,
+        start_time=start_time,
+        end_time=end_time,
     )
 
     db.session.add(new_event)
     db.session.commit()
 
-    return redirect(url_for('system_data'))
+    return redirect(url_for("system_data"))
 
 
-@app.route("/attendance",methods=["GET","POST"])
+@app.route("/attendance", methods=["GET", "POST"])
 def attendance():
-    if request.method == 'POST':
-        student_id = request.form.get("student_id","").strip().upper()
-        event_id = request.form.get("event_id","").strip()
+    if request.method == "POST":
+        student_id = request.form.get("student_id", "").strip().upper()
+        event_id = request.form.get("event_id", "").strip()
 
-
-        student = Student.query.filter_by(
-            student_id=student_id
-        ).first()
+        student = Student.query.filter_by(student_id=student_id).first()
 
         if not student:
-            print('student is not registerd')
+            print("student is not registerd")
             return {
-                "success":False,
-                "type":"error",
-                "message":"Student id not found"
-            },400
+                "success": False,
+                "type": "error",
+                "message": "Student id not found",
+            }, 400
 
-        event = Event.query.filter_by(
-            event_id = event_id
-        ).first()
+        event = Event.query.filter_by(event_id=event_id).first()
 
         if not event:
-            print('event is not registerd')
+            print("event is not registerd")
             return {
-                "success":False,
-                "type":"error",
-                "message":"Event id is not found"
-            },400
-
-
+                "success": False,
+                "type": "error",
+                "message": "Event id is not found",
+            }, 400
 
         existing_attendance = Attendance.query.filter_by(
-            student_id = student_id,
-            event_id = event_id
+            student_id=student_id, event_id=event_id
         ).first()
 
         if existing_attendance:
-            print('already registerd')
+            print("already registerd")
             return {
-                "success":False,
-                "type":"duplicate",
-                "message":"Attendance already marked",
-                "student_id":student.student_id,
-                "student_name":student.name
-            },409
+                "success": False,
+                "type": "duplicate",
+                "message": "Attendance already marked",
+                "student_id": student.student_id,
+                "student_name": student.name,
+            }, 409
 
         attendance_record = Attendance(
-            student_id = student_id,
-            event_id = event_id,
-            marked_at = datetime.now()
+            student_id=student_id, event_id=event_id, marked_at=datetime.now()
         )
 
         try:
@@ -257,12 +319,8 @@ def attendance():
         except Exception as e:
             db.session.rollback()
             print(e)
-            return {
-                "success": False,
-                "type": "error",
-                "message": "Database error"
-            },500
-        
+            return {"success": False, "type": "error", "message": "Database error"}, 500
+
         print("attendance marked successfully")
         return {
             "success": True,
@@ -270,11 +328,11 @@ def attendance():
             "message": "Attendance marked successfully.",
             "student_id": student.student_id,
             "student_name": student.name,
-            "event_name": event.event_name
+            "event_name": event.event_name,
         }
-        
+
     events = Event.query.all()
-    return render_template("attendance.html",events=events)
+    return render_template("attendance.html", events=events)
 
 
 if __name__ == "__main__":
